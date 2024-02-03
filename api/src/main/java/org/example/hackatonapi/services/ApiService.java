@@ -39,7 +39,7 @@ public class ApiService {
         return responseEntity.getBody();
     }
 
-    public byte[] getStatisticsAsPNG(String currencyCode, String bankName, String startDate, String endDate) {
+        public byte[] getStatisticsAsPNG(String currencyCode, String bankName, String startDate, String endDate) {
         String url = baseUrl + "/api/banks/statistics/png?currencyCode=" + currencyCode + "&bankName=" + bankName +
                 "&startDate=" + startDate + "&endDate=" + endDate;
         ResponseEntity<byte[]> responseEntity = new RestTemplate().getForEntity(url, byte[].class);
