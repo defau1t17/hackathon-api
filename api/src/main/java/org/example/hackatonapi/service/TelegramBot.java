@@ -201,7 +201,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 default -> {
                     SendMessage promptMessage = new SendMessage();
                     promptMessage.setChatId(chatId);
-                    promptMessage.setText("Введите дату в формате YYYY-MM-DD (например, 2024-02-03):");
+                    promptMessage.setText("Введите команду или дату в формате YYYY-MM-DD (например, 2024-02-03), чтобы получить курс на текущую дату:");
                     sendMessage(promptMessage);
 
                     String inputDate = update.getMessage().getText().trim();
