@@ -1,16 +1,10 @@
 package org.example.hackatonapi.controllers;
 
-import org.example.hackatonapi.models.CurrencyDTO;
-import org.example.hackatonapi.models.StatisticsDTO;
-import org.example.hackatonapi.models.enums.Bank;
+import org.example.hackatonapi.models.enums.BankConsts;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +15,7 @@ public class BankController {
 
     @GetMapping
     public ResponseEntity<Set<String>> getAllBanks() {
-        Set<String> banks = Stream.of(Bank.ALFA, Bank.NBRN, Bank.BELBANK)
+        Set<String> banks = Stream.of(BankConsts.ALFA, BankConsts.NBRB, BankConsts.BELBANK)
                 .collect(Collectors.toSet());
 
         return ResponseEntity.status(HttpStatus.OK).body(banks);

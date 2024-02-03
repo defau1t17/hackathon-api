@@ -10,12 +10,4 @@ public class CurrencyDTO {
     private double offBuyRate;
     private double offSellRate;
     private LocalDate date;
-
-    public CurrencyDTO(String name, double buy, LocalDate date) {
-        this.shortName = name;
-        this.offBuyRate = buy;
-        this.offSellRate = buy;
-        this.date = date;
-    }
-
 }
