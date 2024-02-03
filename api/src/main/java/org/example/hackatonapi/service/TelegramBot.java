@@ -1,6 +1,5 @@
 package org.example.hackatonapi.service;
 
-import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.example.hackatonapi.config.BotConfig;
 import org.example.hackatonapi.menu.ActionMenu;
@@ -9,7 +8,6 @@ import org.example.hackatonapi.menu.DateMenu;
 import org.example.hackatonapi.model.State;
 import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.example.hackatonapi.services.ApiService;
-import org.example.hackatonapi.services.NBRBCurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,14 +15,9 @@ import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import javax.imageio.ImageIO;
@@ -45,7 +38,7 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
     private static HashMap<Long, State> map = new HashMap<>();
 
-    private static String inputDate = "2024-02-02";
+    private static String inputUserDate = "2024-02-02";
     final BotConfig config;
     @Autowired
     private ApiService apiService;
@@ -180,6 +173,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
                 case "Статистика" -> {
+                    System.out.println(inputUserDate);
                     byte[] png = apiService.getStatisticsAsPNG(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), "2024-01-31", LocalDate.now().toString());
 
                     SendPhoto sendPhoto = new SendPhoto();
@@ -206,14 +200,35 @@ public class TelegramBot extends TelegramLongPollingBot {
 //                    sendMessage(message);
                 }
                 default -> {
-                    System.out.println(LocalDate.now());
-                    CurrencyDTO currencyRateForDate = apiService.getCurrencyRateForDate(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), inputDate);
+                    SendMessage promptMessage = new SendMessage();
+                    promptMessage.setChatId(chatId);
+                    promptMessage.setText("Введите дату в формате YYYY-MM-DD (например, 2024-02-03):");
+                    sendMessage(promptMessage);
 
-                    SendMessage message = new SendMessage();
-                    message.setChatId(chatId);
-                    message.setText("Курс покупки: " + currencyRateForDate.getOffBuyRate() +
-                            "\nКурс продажи: " + currencyRateForDate.getOffSellRate());
-                    sendMessage(message);
+                    String inputDate = update.getMessage().getText().trim();
+                    inputUserDate=inputDate;
+                    System.out.println(inputDate);
+
+                    try {
+                        LocalDate selectedDate = LocalDate.parse(inputDate);
+                        System.out.println(selectedDate);
+                        CurrencyDTO currencyRateForSelectedDate = apiService.getCurrencyRateForDate(
+                                map.get(chatId).getCurrencyName(),
+                                map.get(chatId).getBankName(),
+                                String.valueOf(selectedDate)
+                        );
+
+                        SendMessage message = new SendMessage();
+                        message.setChatId(chatId);
+                        message.setText("Курс покупки: " + currencyRateForSelectedDate.getOffBuyRate() +
+                                "\nКурс продажи: " + currencyRateForSelectedDate.getOffSellRate());
+                        sendMessage(message);
+                    } catch (DateTimeParseException e) {
+                        SendMessage errorMessage = new SendMessage();
+                        errorMessage.setChatId(chatId);
+                        errorMessage.setText("");
+                        sendMessage(errorMessage);
+                    }
                 }
             }
         }
