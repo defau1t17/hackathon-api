@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/currency-rates")
-public class TestBalarusBankController {
+public class TestBelarusBankController {
     @Autowired
     private BalarusBankService currencyRateService;
 
