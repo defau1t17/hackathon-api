@@ -13,12 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/banks")
@@ -40,6 +37,8 @@ public class BankController {
         return ResponseEntity.status(HttpStatus.OK).body(banks);
     }
 
+    @GetMapping("/{bankName}/currencies")
+    @Operation(summary = "Get list of available currencies for a specific bank", description = "Get list of available currencies for a specific bank")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK - Returns an array of available currencies"),
             @ApiResponse(responseCode = "404", description = "Not Found - If the bank with the specified name is not found"),
@@ -101,10 +100,49 @@ public class BankController {
         return ResponseEntity.ok(currencyDTO);
     }
 
+    @GetMapping("/rates")
+    public ResponseEntity<List<CurrencyDTO>> getCurrencyRatesInDateRange(
+            @RequestParam String currencyCode,
+            @RequestParam String bankName,
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        if (!BankConsts.ALL_BANKS.contains(bankName.toUpperCase())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+        if (start.isAfter(end)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        List<CurrencyDTO> currencyDTOs;
+        switch (bankName.toUpperCase()) {
+            case BankConsts.ALFA:
+                currencyDTOs = alfabankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            case BankConsts.BELBANK:
+                currencyDTOs = balarusBankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            case BankConsts.NBRB:
+                currencyDTOs = nbrbCurrencyService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            default:
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        if (currencyDTOs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(currencyDTOs);
+    }
+
 //    @GetMapping("/statistics")
 //    @Operation(summary = "Get statistics for a specific currency within a specified time range and bank", description = "Get statistical data for a currency within a specified time range and bank")
 //    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK - Returns statistical data for the currency"),
+//            @ApiResponse(responseCode = "200", description = a"OK - Returns statistical data for the currency"),
 //            @ApiResponse(responseCode = "404", description = "Not Found - If the data for the specified currency, bank, or time range is not found"),
 //            @ApiResponse(responseCode = "400", description = "Bad Request - If start date is later than end date or for other invalid request parameters"),
 //            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")

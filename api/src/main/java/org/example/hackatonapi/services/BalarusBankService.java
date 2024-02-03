@@ -95,4 +95,29 @@ public class BalarusBankService implements BankService {
         }
         return null;
     }
+
+    @Override
+    public List<CurrencyDTO> getCurrencyRatesInDateRange(String currencyCode, String startDate, String endDate) {
+        BelarusBankCurrencyRate[] currencyRates = getCurrencyRates();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        List<CurrencyDTO> currencyDTOs = new ArrayList<>();
+
+        for (BelarusBankCurrencyRate currencyRate : currencyRates) {
+            LocalDate currencyDate = LocalDateTime.parse(
+                    currencyRate.getKursDateTime(),
+                    formatter
+            ).toLocalDate();
+
+            if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0 ||
+                    currencyRate.getEurCardIn() > 0 || currencyRate.getEurCardOut() > 0 ||
+                    currencyRate.getRubCardIn() > 0 || currencyRate.getRubCardOut() > 0) {
+                if (!currencyDate.isBefore(LocalDate.parse(startDate)) && !currencyDate.isAfter(LocalDate.parse(endDate))) {
+                    currencyDTOs.add(convertToCurrencyDTO(currencyRate));
+                }
+            }
+        }
+
+        return currencyDTOs;
+    }
+
 }
