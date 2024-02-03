@@ -40,7 +40,7 @@ public class NBRBCurrencyService {
 
             System.out.println(date);
 
-            currencyDTOS[i] = new CurrencyDTO(name, price, date);
+            currencyDTOS[i] = new CurrencyDTO(name, price, price, date);
         }
 
         return  currencyDTOS;
