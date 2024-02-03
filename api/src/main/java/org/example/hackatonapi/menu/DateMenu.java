@@ -8,35 +8,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DateMenu {
+
     public static SendMessage getMenu() {
         SendMessage message = new SendMessage();
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
-        KeyboardRow row = new KeyboardRow();
-        row.add("Курс на текущий день");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-
-        row.add("Курс на выбранный день");
-        keyboardRows.add(row);
-
-
-        row = new KeyboardRow();
-        row.add("Выбрать другой банк");
-        row.add("Выбрать другую валюту");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Статистика");
-        keyboardRows.add(row);
+        keyboardRows.add(createKeyboardRow("Курс на текущий день"));
+        keyboardRows.add(createKeyboardRow("Курс на выбранный день"));
+        keyboardRows.add(createKeyboardRow("Выбрать другой банк", "Выбрать другую валюту"));
+        keyboardRows.add(createKeyboardRow("Статистика"));
 
         keyboardMarkup.setKeyboard(keyboardRows);
-
         message.setReplyMarkup(keyboardMarkup);
 
-        return  message;
+        return message;
+    }
+
+    private static KeyboardRow createKeyboardRow(String... buttons) {
+        KeyboardRow row = new KeyboardRow();
+        for (String button : buttons) {
+            row.add(button);
+        }
+        return row;
     }
 }

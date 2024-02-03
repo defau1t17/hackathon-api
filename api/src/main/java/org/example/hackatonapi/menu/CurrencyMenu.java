@@ -1,6 +1,5 @@
 package org.example.hackatonapi.menu;
 
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
@@ -8,7 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrencyMenu{
+public class CurrencyMenu {
 
     public static SendMessage getMenu() {
         SendMessage message = new SendMessage();
@@ -16,25 +15,21 @@ public class CurrencyMenu{
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
-        KeyboardRow row = new KeyboardRow();
-        row.add("USD");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-
-        row.add("EUR");
-        row.add("RUB");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-        row.add("Выбрать другой банк");
-//        row.add("Выбрать другую дату");
-        keyboardRows.add(row);
+        keyboardRows.add(createKeyboardRow("USD"));
+        keyboardRows.add(createKeyboardRow("EUR", "RUB"));
+        keyboardRows.add(createKeyboardRow("Выбрать другой банк"));
 
         keyboardMarkup.setKeyboard(keyboardRows);
-
         message.setReplyMarkup(keyboardMarkup);
 
-        return  message;
+        return message;
+    }
+
+    private static KeyboardRow createKeyboardRow(String... buttons) {
+        KeyboardRow row = new KeyboardRow();
+        for (String button : buttons) {
+            row.add(button);
+        }
+        return row;
     }
 }

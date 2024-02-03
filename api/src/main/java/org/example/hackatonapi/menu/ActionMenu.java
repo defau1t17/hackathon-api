@@ -15,26 +15,20 @@ public class ActionMenu {
 
         List<KeyboardRow> keyboardRows = new ArrayList<>();
 
-        KeyboardRow row = new KeyboardRow();
-        row.add("Альфа банк");
-        keyboardRows.add(row);
-
-        row = new KeyboardRow();
-
-        row.add("Беларусбанк");
-        row.add("НБРБ");
-        keyboardRows.add(row);
-
-//        row = new KeyboardRow();
-//        row.add("Выбрать другой банк");
-//        row.add("Выбрать другую валюту");
-//        keyboardRows.add(row);
+        keyboardRows.add(createKeyboardRow("Альфа банк"));
+        keyboardRows.add(createKeyboardRow("Беларусбанк", "НБРБ"));
 
         keyboardMarkup.setKeyboard(keyboardRows);
-
         message.setReplyMarkup(keyboardMarkup);
 
         return message;
     }
 
+    private static KeyboardRow createKeyboardRow(String... buttons) {
+        KeyboardRow row = new KeyboardRow();
+        for (String button : buttons) {
+            row.add(button);
+        }
+        return row;
+    }
 }

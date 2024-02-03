@@ -9,20 +9,20 @@ public class BelarusBankCurrencyRate {
     private String kursDateTime;
 
     @JsonProperty("USDCARD_in")
-    private double usdCardIn;
+    private Double usdCardIn;
 
     @JsonProperty("USDCARD_out")
-    private double usdCardOut;
+    private Double usdCardOut;
 
     @JsonProperty("EURCARD_in")
-    private double eurCardIn;
+    private Double eurCardIn;
 
     @JsonProperty("EURCARD_out")
-    private double eurCardOut;
+    private Double eurCardOut;
 
     @JsonProperty("RUBCARD_in")
-    private double rubCardIn;
+    private Double rubCardIn;
 
     @JsonProperty("RUBCARD_out")
-    private double rubCardOut;
+    private Double rubCardOut;
 }

@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import java.util.List;
 
 @Service
-public class NBRBCurrencyService implements BankService {
+public class NBRBCurrencyService implements BankServiceInterface {
 
     private final String RATES_API_URL = "https://api.nbrb.by/exrates/rates?periodicity=0";
     private final String RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT = "https://api.nbrb.by/exrates/rates/%s?parammode=2&ondate=%s";
