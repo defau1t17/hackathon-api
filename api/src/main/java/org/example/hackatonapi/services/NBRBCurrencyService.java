@@ -1,13 +1,14 @@
 package org.example.hackatonapi.services;
 
 import org.example.hackatonapi.models.dto.CurrencyDTO;
-import org.example.hackatonapi.models.NBRBCurrency;
 import org.example.hackatonapi.models.NBRBRate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.stream.Stream;
+import java.util.List;
 
 @Service
 public class NBRBCurrencyService implements BankService {
@@ -50,4 +51,21 @@ public class NBRBCurrencyService implements BankService {
         return null;
     }
 
+    @Override
+    public List<CurrencyDTO> getCurrencyRatesInDateRange(String currencyCode, String startDate, String endDate) {
+        NBRBRate[] rates = getRates();
+        List<CurrencyDTO> currencyDTOs = new ArrayList<>();
+
+        for (NBRBRate rate : rates) {
+            LocalDate currencyDate = rate.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+            if (currencyCode.equalsIgnoreCase(rate.getCur_Abbreviation()) &&
+                    !currencyDate.isBefore(LocalDate.parse(startDate)) &&
+                    !currencyDate.isAfter(LocalDate.parse(endDate))) {
+                currencyDTOs.add(convertRateToCurrencyDTO(rate));
+            }
+        }
+
+        return currencyDTOs;
+    }
 }

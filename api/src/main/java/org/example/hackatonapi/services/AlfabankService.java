@@ -49,4 +49,28 @@ public class AlfabankService implements BankService {
         }
         return null;
     }
+
+    @Override
+    public List<CurrencyDTO> getCurrencyRatesInDateRange(String currencyCode, String startDate, String endDate) {
+        AlfabankCurrencyRate currencyRate = getCurrencies();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        List<CurrencyDTO> currencyDTOs = new ArrayList<>();
+
+        for (AlfaCurrency alfaCurrency : currencyRate.getRates()) {
+            LocalDate currencyDate = LocalDate.parse(alfaCurrency.getDate(), formatter);
+
+            if (alfaCurrency.getSellIso().equalsIgnoreCase(currencyCode) &&
+                    !currencyDate.isBefore(LocalDate.parse(startDate)) &&
+                    !currencyDate.isAfter(LocalDate.parse(endDate))) {
+                currencyDTOs.add(new CurrencyDTO(
+                        alfaCurrency.getSellIso(),
+                        alfaCurrency.getBuyRate(),
+                        alfaCurrency.getSellRate(),
+                        currencyDate
+                ));
+            }
+        }
+        return currencyDTOs;
+    }
+
 }
