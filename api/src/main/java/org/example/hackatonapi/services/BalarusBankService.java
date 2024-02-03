@@ -1,6 +1,6 @@
 package org.example.hackatonapi.services;
 
-import org.example.hackatonapi.models.BelarusbankCurrencyRate;
+import org.example.hackatonapi.models.BelarusBankCurrencyRate;
 import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,21 +19,21 @@ public class BalarusBankService implements BankService {
     RestTemplate restTemplate = new RestTemplate();
 
     public List<CurrencyDTO> getAllConvertedCurrencyRates() {
-        BelarusbankCurrencyRate[] currencyRates = getCurrencyRates();
+        BelarusBankCurrencyRate[] currencyRates = getCurrencyRates();
         return convertToCurrencyDTOList(currencyRates);
     }
 
-    public BelarusbankCurrencyRate[] getCurrencyRates() {
-        return restTemplate.getForObject(API_URL, BelarusbankCurrencyRate[].class);
+    public BelarusBankCurrencyRate[] getCurrencyRates() {
+        return restTemplate.getForObject(API_URL, BelarusBankCurrencyRate[].class);
     }
 
-    private List<CurrencyDTO> convertToCurrencyDTOList(BelarusbankCurrencyRate[] currencyRates) {
+    private List<CurrencyDTO> convertToCurrencyDTOList(BelarusBankCurrencyRate[] currencyRates) {
         return Arrays.stream(currencyRates)
                 .map(this::convertToCurrencyDTO)
                 .collect(Collectors.toList());
     }
 
-    private CurrencyDTO convertToCurrencyDTO(BelarusbankCurrencyRate currencyRate) {
+    private CurrencyDTO convertToCurrencyDTO(BelarusBankCurrencyRate currencyRate) {
         CurrencyDTO currencyDTO = new CurrencyDTO();
 
         currencyDTO.setDate(
@@ -50,15 +50,21 @@ public class BalarusBankService implements BankService {
 
     @Override
     public CurrencyDTO getCurrencyRateForDate(String currencyCode, String date) {
-        BelarusbankCurrencyRate[] currencyRates = getCurrencyRates();
+        BelarusBankCurrencyRate[] currencyRates = getCurrencyRates();
 
-        for (BelarusbankCurrencyRate currencyRate : currencyRates) {
+        for (BelarusBankCurrencyRate currencyRate : currencyRates) {
             LocalDate currencyDate = LocalDateTime.parse(
                             currencyRate.getKursDateTime(),
                             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
                     .toLocalDate();
 
             if ("USD".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
+                return convertToCurrencyDTO(currencyRate);
+            }
+            if ("EUR".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
+                return convertToCurrencyDTO(currencyRate);
+            }
+            if ("RUB".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
                 return convertToCurrencyDTO(currencyRate);
             }
         }

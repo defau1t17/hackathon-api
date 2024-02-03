@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class BelarusbankCurrencyRate {
+public class BelarusBankCurrencyRate {
     @JsonProperty("kurs_date_time")
     private String kursDateTime;
 

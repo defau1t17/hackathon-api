@@ -7,29 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.stream.Stream;
 
 @Service
 public class NBRBCurrencyService implements BankService {
 
-    private final String CURRENCIES_API_URL = "https://api.nbrb.by/exrates/currencies";
     private final String RATES_API_URL = "https://api.nbrb.by/exrates/rates?periodicity=0";
     private final String RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT = "https://api.nbrb.by/exrates/rates/%s?parammode=2&ondate=%s";
 
     RestTemplate restTemplate = new RestTemplate();
 
-    public NBRBCurrency[] getCurrencies() {
-        return restTemplate.getForObject(CURRENCIES_API_URL, NBRBCurrency[].class);
-    }
-
     public NBRBRate[] getRates() {
         return restTemplate.getForObject(RATES_API_URL, NBRBRate[].class);
-    }
-
-    public NBRBRate getRateForCurrencyOnDate(String curr, String date) {
-        String apiURL = String.format(RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT, curr, date);
-        return restTemplate.getForObject(apiURL, NBRBRate.class);
     }
 
     public CurrencyDTO[] convertToCurrencyDTO(NBRBRate[] rates) {
@@ -46,18 +35,19 @@ public class NBRBCurrencyService implements BankService {
         return new CurrencyDTO(name, price, price, date);
     }
 
+    public NBRBRate getRateForCurrencyOnDate(String curr, String date) {
+        String apiURL = String.format(RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT, curr, date);
+        return restTemplate.getForObject(apiURL, NBRBRate.class);
+    }
 
     @Override
     public CurrencyDTO getCurrencyRateForDate(String currencyCode, String date) {
-        NBRBRate[] rates = getRates();
+        NBRBRate rate = getRateForCurrencyOnDate(currencyCode, date);
 
-        for (NBRBRate rate : rates) {
-            LocalDate currencyDate = rate.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-            if (currencyCode.equalsIgnoreCase(rate.getCur_Abbreviation()) && currencyDate.isEqual(LocalDate.parse(date))) {
-                return convertRateToCurrencyDTO(rate);
-            }
+        if (rate != null) {
+            return convertRateToCurrencyDTO(rate);
         }
         return null;
     }
+
 }

@@ -20,6 +20,7 @@ public class AlfabankService implements BankService {
 
     public AlfabankCurrencyRate getCurrencies() {
         AlfabankCurrencyRate body = restTemplate.getForEntity(ALFABANK_REQUEST_URL, AlfabankCurrencyRate.class).getBody();
+        assert body != null;
         body.setRates(body.getRates().stream().filter(alfaCurrency -> alfaCurrency.getBuyIso().equals("BYN")).toList());
         return body;
     }
