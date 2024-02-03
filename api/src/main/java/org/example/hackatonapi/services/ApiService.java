@@ -11,8 +11,7 @@ import java.util.Set;
 @Service
 public class ApiService {
 
-    @Value("${api.base.url}")
-    private String baseUrl;
+    private final String baseUrl = "localhost:8080";
 
     RestTemplate restTemplate = new RestTemplate();
 
