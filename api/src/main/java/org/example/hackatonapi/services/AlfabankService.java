@@ -19,7 +19,9 @@ public class AlfabankService {
     private final String ALFABANK_REQUEST_URL = "https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates";
 
     public AlfabankCurrencyRate getCurrencies(){
-        return restTemplate.getForEntity(ALFABANK_REQUEST_URL, AlfabankCurrencyRate.class).getBody();
+        AlfabankCurrencyRate body = restTemplate.getForEntity(ALFABANK_REQUEST_URL, AlfabankCurrencyRate.class).getBody();
+        body.setRates(body.getRates().stream().filter(alfaCurrency -> alfaCurrency.getBuyIso().equals("BYN")).toList());
+        return body;
     }
 
     public List<CurrencyDTO> convertAlfabankCurrencyToDTO(AlfabankCurrencyRate currencyRate){
