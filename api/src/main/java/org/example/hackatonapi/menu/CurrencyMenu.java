@@ -29,7 +29,6 @@ public class CurrencyMenu{
         row = new KeyboardRow();
         row.add("Выбрать другой банк");
 //        row.add("Выбрать другую дату");
-
         keyboardRows.add(row);
 
         keyboardMarkup.setKeyboard(keyboardRows);
