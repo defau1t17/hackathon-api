@@ -1,4 +1,4 @@
-package org.example.hackatonapi.models;
+package org.example.hackatonapi.models.dto;
 
 import lombok.Data;
 

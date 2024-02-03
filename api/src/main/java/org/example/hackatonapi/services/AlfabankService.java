@@ -3,17 +3,13 @@ package org.example.hackatonapi.services;
 
 import org.example.hackatonapi.models.AlfaCurrency;
 import org.example.hackatonapi.models.AlfabankCurrencyRate;
-import org.example.hackatonapi.models.CurrencyDTO;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
 
 @Service
@@ -35,7 +31,4 @@ public class AlfabankService {
         }
     return currencyDTOS;
     }
-
-
-
 }

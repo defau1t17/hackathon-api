@@ -1,6 +1,6 @@
 package org.example.hackatonapi.services;
 
-import org.example.hackatonapi.models.CurrencyDTO;
+import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.example.hackatonapi.models.NBRBCurrency;
 import org.example.hackatonapi.models.NBRBRate;
 import org.springframework.stereotype.Service;

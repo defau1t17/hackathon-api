@@ -1,10 +1,19 @@
 package org.example.hackatonapi.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.example.hackatonapi.models.enums.BankConsts;
+import org.example.hackatonapi.services.AlfabankService;
+import org.example.hackatonapi.services.BalarusBankService;
+import org.example.hackatonapi.services.NBRBCurrencyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,32 +21,54 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/api/banks")
 public class BankController {
+    public BankController(AlfabankService alfabankService, BalarusBankService balarusBankService, NBRBCurrencyService nbrbCurrencyService) {
+        this.alfabankService = alfabankService;
+        this.balarusBankService = balarusBankService;
+        this.nbrbCurrencyService = nbrbCurrencyService;
+    }
+
+    private final AlfabankService alfabankService;
+    private final BalarusBankService balarusBankService;
+    private final NBRBCurrencyService nbrbCurrencyService;
 
     @GetMapping
     public ResponseEntity<Set<String>> getAllBanks() {
-        Set<String> banks = Stream.of(BankConsts.ALFA, BankConsts.NBRB, BankConsts.BELBANK)
-                .collect(Collectors.toSet());
+        Set<String> banks = BankConsts.ALL_BANKS;
 
         return ResponseEntity.status(HttpStatus.OK).body(banks);
     }
 
-//    @GetMapping("/{bankName}/currencies")
-//    @Operation(summary = "Get list of available currencies for a specific bank", description = "Get list of available currencies for a specific bank")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "OK - Returns an array of available currencies"),
-//            @ApiResponse(responseCode = "404", description = "Not Found - If the bank with the specified name is not found"),
-//            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
-//    })
-//    public ResponseEntity<List<CurrencyDTO>> getCurrenciesForBank(@PathVariable String bankName) {
-//        List<CurrencyDTO> currencies = CurrencyService.getCurrenciesByBank(bankName);
-//
-//        if (currencies.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(currencies);
-//    }
-//
+    @GetMapping("/{bankName}/currencies")
+    @Operation(summary = "Get list of available currencies for a specific bank", description = "Get list of available currencies for a specific bank")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - Returns an array of available currencies"),
+            @ApiResponse(responseCode = "404", description = "Not Found - If the bank with the specified name is not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
+    })
+    public ResponseEntity<List<CurrencyDTO>> getBankCurrencies(@PathVariable String bankName) {
+        if (!BankConsts.ALL_BANKS.contains(bankName.toUpperCase())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        List<CurrencyDTO> currencies;
+
+        switch (bankName.toUpperCase()) {
+            case BankConsts.ALFA:
+                currencies = alfabankService.convertAlfabankCurrencyToDTO(alfabankService.getCurrencies());
+                break;
+            case BankConsts.BELBANK:
+                currencies = balarusBankService.getAllConvertedCurrencyRates();
+                break;
+            case BankConsts.NBRB:
+                currencies = Arrays.asList(nbrbCurrencyService.convertToCurrencyDTO(nbrbCurrencyService.getRates()));
+                break;
+            default:
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.ok(currencies);
+    }
+
 //    @GetMapping("/statistics")
 //    @Operation(summary = "Get statistics for a specific currency within a specified time range and bank", description = "Get statistical data for a currency within a specified time range and bank")
 //    @ApiResponses(value = {

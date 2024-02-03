@@ -1,8 +1,7 @@
 package org.example.hackatonapi.services;
 
 import org.example.hackatonapi.models.BelarusbankCurrencyRate;
-import org.example.hackatonapi.models.CurrencyDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
