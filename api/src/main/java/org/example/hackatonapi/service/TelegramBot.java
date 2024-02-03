@@ -152,14 +152,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                     try {
                         BufferedImage image = byteArrayToImage(png);
 
-                        // Convert BufferedImage to Inputstream
                         ByteArrayOutputStream os = new ByteArrayOutputStream();
                         ImageIO.write(image, "png", os);
                         InputStream is = new ByteArrayInputStream(os.toByteArray());
 
-                        // Set the photo and send the message
                         sendPhoto.setPhoto(new InputFile(is, "your_filename.png"));
-                        execute(sendPhoto);  // Assuming you have a method named execute to send the message
+                        execute(sendPhoto);  
 
                         System.out.println("Изображение успешно отправлено");
                     } catch (IOException | TelegramApiException e) {
