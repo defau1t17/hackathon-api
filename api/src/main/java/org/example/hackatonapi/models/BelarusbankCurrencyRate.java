@@ -25,22 +25,4 @@ public class BelarusbankCurrencyRate {
 
     @JsonProperty("RUBCARD_out")
     private double rubCardOut;
-
-    @JsonProperty("USDCARD_EURCARD_in")
-    private double usdToEurIn;
-
-    @JsonProperty("USDCARD_EURCARD_out")
-    private double usdToEurOut;
-
-    @JsonProperty("USDCARD_RUBCARD_in")
-    private double usdToRubIn;
-
-    @JsonProperty("USDCARD_RUBCARD_out")
-    private double usdToRubOut;
-
-    @JsonProperty("RUBCARD_EURCARD_in")
-    private double rubToEurIn;
-
-    @JsonProperty("RUBCARD_EURCARD_out")
-    private double rubToEurOut;
 }
