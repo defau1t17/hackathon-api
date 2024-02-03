@@ -2,6 +2,7 @@ package org.example.hackatonapi.services;
 
 import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,30 +14,35 @@ public class ApiService {
 
     private final String baseUrl = "localhost:8080";
 
-    RestTemplate restTemplate = new RestTemplate();
-
     public Set<String> getAllBanks() {
         String url = baseUrl + "/api/banks";
-        return restTemplate.getForObject(url, Set.class);
+        ResponseEntity<Set> responseEntity = new RestTemplate().getForEntity(url, Set.class);
+        return responseEntity.getBody();
     }
 
     public List<CurrencyDTO> getBankCurrencies(String bankName) {
-        String url = baseUrl + "/api/banks/{bankName}/currencies";
-        return restTemplate.getForObject(url, List.class, bankName);
+        String url = baseUrl + "/api/banks/" + bankName + "/currencies";
+        ResponseEntity<List> responseEntity = new RestTemplate().getForEntity(url, List.class);
+        return responseEntity.getBody();
     }
 
     public CurrencyDTO getCurrencyRateForDate(String currencyCode, String bankName, String date) {
-        String url = baseUrl + "/api/banks/rate?currencyCode={currencyCode}&bankName={bankName}&date={date}";
-        return restTemplate.getForObject(url, CurrencyDTO.class, currencyCode, bankName, date);
+        String url = baseUrl + "/api/banks/rate?currencyCode=" + currencyCode + "&bankName=" + bankName + "&date=" + date;
+        ResponseEntity<CurrencyDTO> responseEntity = new RestTemplate().getForEntity(url, CurrencyDTO.class);
+        return responseEntity.getBody();
     }
 
-    public List getCurrencyRatesInDateRange(String currencyCode, String bankName, String startDate, String endDate) {
-        String url = baseUrl + "/api/banks/rates?currencyCode={currencyCode}&bankName={bankName}&startDate={startDate}&endDate={endDate}";
-        return restTemplate.getForObject(url, List.class, currencyCode, bankName, startDate, endDate);
+    public List<CurrencyDTO> getCurrencyRatesInDateRange(String currencyCode, String bankName, String startDate, String endDate) {
+        String url = baseUrl + "/api/banks/rates?currencyCode=" + currencyCode + "&bankName=" + bankName +
+                "&startDate=" + startDate + "&endDate=" + endDate;
+        ResponseEntity<List> responseEntity = new RestTemplate().getForEntity(url, List.class);
+        return responseEntity.getBody();
     }
 
-    public byte[] getStatisticsChart(String currencyCode, String bankName, String startDate, String endDate) {
-        String url = baseUrl + "/api/banks/statistics/png?currencyCode={currencyCode}&bankName={bankName}&startDate={startDate}&endDate={endDate}";
-        return restTemplate.getForObject(url, byte[].class, currencyCode, bankName, startDate, endDate);
+    public byte[] getStatisticsAsPNG(String currencyCode, String bankName, String startDate, String endDate) {
+        String url = baseUrl + "/api/banks/statistics/png?currencyCode=" + currencyCode + "&bankName=" + bankName +
+                "&startDate=" + startDate + "&endDate=" + endDate;
+        ResponseEntity<byte[]> responseEntity = new RestTemplate().getForEntity(url, byte[].class);
+        return responseEntity.getBody();
     }
 }
