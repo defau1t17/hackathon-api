@@ -8,14 +8,28 @@ import org.example.hackatonapi.models.enums.BankConsts;
 import org.example.hackatonapi.services.AlfabankService;
 import org.example.hackatonapi.services.BalarusBankService;
 import org.example.hackatonapi.services.NBRBCurrencyService;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtils;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/banks")
@@ -139,25 +153,85 @@ public class BankController {
         return ResponseEntity.ok(currencyDTOs);
     }
 
-//    @GetMapping("/statistics")
-//    @Operation(summary = "Get statistics for a specific currency within a specified time range and bank", description = "Get statistical data for a currency within a specified time range and bank")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = a"OK - Returns statistical data for the currency"),
-//            @ApiResponse(responseCode = "404", description = "Not Found - If the data for the specified currency, bank, or time range is not found"),
-//            @ApiResponse(responseCode = "400", description = "Bad Request - If start date is later than end date or for other invalid request parameters"),
-//            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
-//    })
-//    public ResponseEntity<StatisticsDTO> getStatistics(
-//            @RequestParam String currencyCode,
-//            @RequestParam String bankName,
-//            @RequestParam String startDate,
-//            @RequestParam String endDate) {
-//        StatisticsDTO statistics = StatisticsService.getStatistics(currencyCode, bankName, startDate, endDate);
-//
-//        if (statistics == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//        }
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(statistics);
-//    }
+    @GetMapping(value = "/statistics/png", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getStatistics(
+            @RequestParam String currencyCode,
+            @RequestParam String bankName,
+            @RequestParam String startDate,
+            @RequestParam String endDate
+    ) {
+        List<CurrencyDTO> historicalData = getHistoricalData(currencyCode, bankName, startDate, endDate);
+
+        assert historicalData != null;
+        XYDataset dataset = createDataset(historicalData);
+
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(
+                "Currency Statistics",
+                "Date",
+                "Exchange Rate",
+                dataset,
+                true,
+                true,
+                false
+        );
+
+        XYPlot plot = (XYPlot) chart.getPlot();
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        renderer.setSeriesShapesVisible(0, true);
+        renderer.setSeriesShapesFilled(0, true);
+        plot.setRenderer(renderer);
+
+
+        byte[] chartBytes = chartToBytes(chart);
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(chartBytes);
+    }
+
+    private List<CurrencyDTO> getHistoricalData(String currencyCode, String bankName, String startDate, String endDate) {
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        if (start.isAfter(end)) {
+            return null;
+        }
+
+        List<CurrencyDTO> historicalData;
+
+        switch (bankName.toUpperCase()) {
+            case BankConsts.ALFA:
+                historicalData = alfabankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            case BankConsts.BELBANK:
+                historicalData = balarusBankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            case BankConsts.NBRB:
+                historicalData = nbrbCurrencyService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
+                break;
+            default:
+                return null;
+        }
+
+        return historicalData;
+    }
+
+
+    private XYDataset createDataset(List<CurrencyDTO> historicalData) {
+        XYSeries series = new XYSeries("Exchange Rate");
+
+        for (CurrencyDTO dataPoint : historicalData) {
+            series.add(dataPoint.getDate().toEpochDay(), dataPoint.getOffBuyRate());
+        }
+
+        return new XYSeriesCollection(series);
+    }
+
+    private byte[] chartToBytes(JFreeChart chart) {
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+            ChartUtils.writeChartAsPNG(byteArrayOutputStream, chart, 800, 600);
+            return byteArrayOutputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
