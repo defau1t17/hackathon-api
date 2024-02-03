@@ -12,7 +12,7 @@ import java.util.Set;
 @Service
 public class ApiService {
 
-    private final String baseUrl = "localhost:8080";
+    private final String baseUrl = "http://localhost:8080";
 
     public Set<String> getAllBanks() {
         String url = baseUrl + "/api/banks";

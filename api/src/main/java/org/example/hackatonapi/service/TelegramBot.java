@@ -7,10 +7,16 @@ import org.example.hackatonapi.menu.ActionMenu;
 import org.example.hackatonapi.menu.CurrencyMenu;
 import org.example.hackatonapi.menu.DateMenu;
 import org.example.hackatonapi.model.State;
+import org.example.hackatonapi.models.dto.CurrencyDTO;
+import org.example.hackatonapi.services.ApiService;
+import org.example.hackatonapi.services.NBRBCurrencyService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
@@ -19,6 +25,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +42,8 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
     private static HashMap<Long, State> map = new HashMap<>();
     final BotConfig config;
+    @Autowired
+    private ApiService apiService;
 
     static final String HELP_TEXT = "hackaton java team 12bot. Type /start to see welcome message";
 
@@ -79,16 +94,16 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(message);
                 }
                 case "Беларусбанк" -> {
-                    sendMessage(setBankState(messageText, chatId));
+                    sendMessage(setBankState("BELBANK", chatId));
 
                 }
 
                 case "Альфа банк" -> {
-                    sendMessage(setBankState(messageText, chatId));
+                    sendMessage(setBankState("ALFA", chatId));
                 }
 
                 case "НБРБ" -> {
-                    sendMessage(setBankState(messageText, chatId));
+                    sendMessage(setBankState("NBRB", chatId));
                 }
 
                 case "USD" -> {
@@ -118,12 +133,55 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                 }
                 case "Курс на текущий день" -> {
+                    System.out.println(LocalDate.now().toString().toString());
+                    CurrencyDTO currencyRateForDate = apiService.getCurrencyRateForDate(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), LocalDate.now().toString());
+
+                    SendMessage message = new SendMessage();
+                    message.setChatId(chatId);
+                    message.setText("Курс покупки: " + currencyRateForDate.getOffBuyRate() +
+                            "\nКурс продажи: " + currencyRateForDate.getOffSellRate());
+                    sendMessage(message);
+                }
+
+                case "Статистика"  -> {
+                    byte[] png = apiService.getStatisticsAsPNG(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), "2024-01-31", LocalDate.now().toString());
+
+                    SendPhoto sendPhoto = new SendPhoto();
+                    sendPhoto.setChatId(chatId);
+
+                    try {
+                        BufferedImage image = byteArrayToImage(png);
+
+                        // Convert BufferedImage to Inputstream
+                        ByteArrayOutputStream os = new ByteArrayOutputStream();
+                        ImageIO.write(image, "png", os);
+                        InputStream is = new ByteArrayInputStream(os.toByteArray());
+
+                        // Set the photo and send the message
+                        sendPhoto.setPhoto(new InputFile(is, "your_filename.png"));
+                        execute(sendPhoto);  // Assuming you have a method named execute to send the message
+
+                        System.out.println("Изображение успешно отправлено");
+                    } catch (IOException | TelegramApiException e) {
+                        e.printStackTrace();
+                    }
+
+
+
+
+//                    sendMessage(message);
                 }
                 default -> {
                     sendMessage(null);
                 }
             }
         }
+    }
+
+
+    private static BufferedImage byteArrayToImage(byte[] byteData) throws IOException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(byteData);
+        return ImageIO.read(bis);
     }
 
     private SendMessage setCurrencyState(String messageText, Long chatId) {
