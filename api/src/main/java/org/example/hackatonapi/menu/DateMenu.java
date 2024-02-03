@@ -23,6 +23,12 @@ public class DateMenu {
         row.add("Курс на выбранный день");
         keyboardRows.add(row);
 
+
+        row = new KeyboardRow();
+        row.add("Выбрать другой банк");
+        row.add("Выбрать другую валюту");
+        keyboardRows.add(row);
+
         keyboardMarkup.setKeyboard(keyboardRows);
 
         message.setReplyMarkup(keyboardMarkup);
