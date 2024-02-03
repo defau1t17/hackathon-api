@@ -14,5 +14,4 @@ public class CurrencyDTO {
     private double offBuyRate;
     private double offSellRate;
     private LocalDate date;
-
 }

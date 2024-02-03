@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class BalarusBankService implements BankService {
+public class BalarusBankService implements BankServiceInterface {
     private static final String API_URL = "https://belarusbank.by/api/kurs_cards";
 
     RestTemplate restTemplate = new RestTemplate();

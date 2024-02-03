@@ -8,7 +8,6 @@ import org.example.hackatonapi.menu.DateMenu;
 import org.example.hackatonapi.model.State;
 import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.example.hackatonapi.services.ApiService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -28,7 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -36,32 +35,25 @@ import java.util.List;
 @Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
-    private static HashMap<Long, State> map = new HashMap<>();
-
-    private static String inputUserDate = "2024-02-02";
+    private static final HashMap<Long, State> map = new HashMap<>();
     final BotConfig config;
-    @Autowired
-    private ApiService apiService;
+    private final ApiService apiService;
 
-    static final String HELP_TEXT = "hackaton java team 12bot. Type /start to see welcome message";
-
-
-    public TelegramBot(BotConfig config) {
-//        user = new User();
+    public TelegramBot(BotConfig config, ApiService apiService) {
         this.config = config;
-        List<BotCommand> listOfCommands = new ArrayList<>();
-        listOfCommands.add(new BotCommand("/start", "get a welcome message"));
-        listOfCommands.add(new BotCommand("/mydata", "get your data store"));
-        listOfCommands.add(new BotCommand("/help", "how to use this bot"));
-        listOfCommands.add(new BotCommand("/settings", "set your preferences"));
+        this.apiService = apiService;
+        List<BotCommand> listOfCommands = Arrays.asList(
+                new BotCommand("/start", "get a welcome message"),
+                new BotCommand("/mydata", "get your data store"),
+                new BotCommand("/help", "how to use this bot"),
+                new BotCommand("/settings", "set your preferences")
+        );
 
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
-//            log.error("Error setting bots command list: " + e.getMessage());
+            System.err.println("Error setting bot's command list: " + e.getMessage());
         }
-
-
     }
 
     @Override
@@ -79,10 +71,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
-            if (chatId != null && !map.containsKey(chatId)) {
-                map.put(chatId, new State());
+
+            if (chatId == null) {
+                System.err.println("Received an update with null chatId.");
+                return;
             }
 
+            if (!map.containsKey(chatId)) {
+                map.put(chatId, new State());
+            }
 
             switch (messageText) {
                 case "/start" -> {
@@ -91,28 +88,13 @@ public class TelegramBot extends TelegramLongPollingBot {
                     message.setChatId(chatId);
                     sendMessage(message);
                 }
-                case "Беларусбанк" -> {
-                    sendMessage(setBankState("BELBANK", chatId));
+                case "Беларусбанк" -> sendMessage(setBankState("BELBANK", chatId));
 
-                }
+                case "Альфа банк" -> sendMessage(setBankState("ALFA", chatId));
 
-                case "Альфа банк" -> {
-                    sendMessage(setBankState("ALFA", chatId));
-                }
+                case "НБРБ" -> sendMessage(setBankState("NBRB", chatId));
 
-                case "НБРБ" -> {
-                    sendMessage(setBankState("NBRB", chatId));
-                }
-
-                case "USD" -> {
-                    sendMessage(setCurrencyState(messageText, chatId));
-                }
-                case "EUR" -> {
-                    sendMessage(setCurrencyState(messageText, chatId));
-                }
-                case "RUB" -> {
-                    sendMessage(setCurrencyState(messageText, chatId));
-                }
+                case "USD", "RUB", "EUR" -> sendMessage(setCurrencyState(messageText, chatId));
 
                 case "Выбрать другой банк" -> {
                     SendMessage message = ActionMenu.getMenu();
@@ -127,9 +109,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(message);
                 }
 
-
                 case "Курс на текущий день" -> {
-                    System.out.println(LocalDate.now());
                     CurrencyDTO currencyRateForDate = apiService.getCurrencyRateForDate(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), LocalDate.now().toString());
 
                     SendMessage message = new SendMessage();
@@ -146,11 +126,8 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                     String inputDate = update.getMessage().getText().trim();
 
-                    System.out.println(inputDate);
-
                     try {
                         LocalDate selectedDate = LocalDate.parse(inputDate);
-                        System.out.println(selectedDate);
                         CurrencyDTO currencyRateForSelectedDate = apiService.getCurrencyRateForDate(
                                 map.get(chatId).getCurrencyName(),
                                 map.get(chatId).getBankName(),
@@ -165,14 +142,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } catch (DateTimeParseException e) {
                         SendMessage errorMessage = new SendMessage();
                         errorMessage.setChatId(chatId);
-                        errorMessage.setText("");
+                        errorMessage.setText("Некорретная информация");
+                        sendMessage(errorMessage);
+                    } catch (Exception e) {
+                        SendMessage errorMessage = new SendMessage();
+                        errorMessage.setChatId(chatId);
+                        errorMessage.setText("Runtime error");
                         sendMessage(errorMessage);
                     }
                 }
 
-
                 case "Статистика" -> {
-                    System.out.println(inputUserDate);
                     byte[] png = apiService.getStatisticsAsPNG(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), "2024-01-31", LocalDate.now().toString());
 
                     SendPhoto sendPhoto = new SendPhoto();
@@ -186,15 +166,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                         InputStream is = new ByteArrayInputStream(os.toByteArray());
 
                         sendPhoto.setPhoto(new InputFile(is, "your_filename.png"));
-                        execute(sendPhoto);  
+                        execute(sendPhoto);
 
-                        System.out.println("Изображение успешно отправлено");
                     } catch (IOException | TelegramApiException e) {
-                        e.printStackTrace();
+                        System.err.println("Error sending photo: " + e.getMessage());
                     }
-
-
-//                    sendMessage(message);
                 }
                 default -> {
                     SendMessage promptMessage = new SendMessage();
@@ -203,12 +179,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(promptMessage);
 
                     String inputDate = update.getMessage().getText().trim();
-                    inputUserDate = inputDate;
-                    System.out.println(inputDate);
 
                     try {
                         LocalDate selectedDate = LocalDate.parse(inputDate);
-                        System.out.println(selectedDate);
                         CurrencyDTO currencyRateForSelectedDate = apiService.getCurrencyRateForDate(
                                 map.get(chatId).getCurrencyName(),
                                 map.get(chatId).getBankName(),
@@ -230,7 +203,6 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         }
     }
-
 
     private static BufferedImage byteArrayToImage(byte[] byteData) throws IOException {
         ByteArrayInputStream bis = new ByteArrayInputStream(byteData);
@@ -254,11 +226,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         return message;
     }
 
-
     private void sendMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
+            System.err.println("Failed to send message: " + e.getMessage());
         }
     }
 }
