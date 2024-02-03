@@ -8,9 +8,8 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class BalarusBankService implements BankService {
@@ -27,25 +26,51 @@ public class BalarusBankService implements BankService {
         return restTemplate.getForObject(API_URL, BelarusBankCurrencyRate[].class);
     }
 
-    private List<CurrencyDTO> convertToCurrencyDTOList(BelarusBankCurrencyRate[] currencyRates) {
-        return Arrays.stream(currencyRates)
-                .map(this::convertToCurrencyDTO)
-                .collect(Collectors.toList());
+    public static List<CurrencyDTO> convertToCurrencyDTOList(BelarusBankCurrencyRate[] currencyRates) {
+        List<CurrencyDTO> convertedRates = new ArrayList<>();
+
+        for (BelarusBankCurrencyRate currencyRate : currencyRates) {
+            LocalDate date = LocalDate.parse(
+                    currencyRate.getKursDateTime(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            );
+
+
+            if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0) {
+                convertedRates.add(new CurrencyDTO("USD", currencyRate.getUsdCardIn(), currencyRate.getUsdCardOut(), date));
+            }
+
+            if (currencyRate.getEurCardIn() > 0 || currencyRate.getEurCardOut() > 0) {
+                convertedRates.add(new CurrencyDTO("EUR", currencyRate.getEurCardIn(), currencyRate.getEurCardOut(), date));
+            }
+
+            if (currencyRate.getRubCardIn() > 0 || currencyRate.getRubCardOut() > 0) {
+                convertedRates.add(new CurrencyDTO("RUB", currencyRate.getRubCardIn(), currencyRate.getRubCardOut(), date));
+            }
+        }
+
+        return convertedRates;
     }
 
     private CurrencyDTO convertToCurrencyDTO(BelarusBankCurrencyRate currencyRate) {
-        CurrencyDTO currencyDTO = new CurrencyDTO();
+        LocalDate date = LocalDate.parse(
+                currencyRate.getKursDateTime(),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
 
-        currencyDTO.setDate(
-                LocalDateTime.parse(currencyRate.getKursDateTime(),
-                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                        .toLocalDate());
+        if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0) {
+            return new CurrencyDTO("USD", currencyRate.getUsdCardIn(), currencyRate.getUsdCardOut(), date);
+        }
 
-        currencyDTO.setShortName("USD");
-        currencyDTO.setOffBuyRate(currencyRate.getUsdCardIn());
-        currencyDTO.setOffSellRate(currencyRate.getUsdCardOut());
+        if (currencyRate.getEurCardIn() > 0 || currencyRate.getEurCardOut() > 0) {
+            return new CurrencyDTO("EUR", currencyRate.getEurCardIn(), currencyRate.getEurCardOut(), date);
+        }
 
-        return currencyDTO;
+        if (currencyRate.getRubCardIn() > 0 || currencyRate.getRubCardOut() > 0) {
+            return new CurrencyDTO("RUB", currencyRate.getRubCardIn(), currencyRate.getRubCardOut(), date);
+        }
+
+        return null;
     }
 
     @Override
