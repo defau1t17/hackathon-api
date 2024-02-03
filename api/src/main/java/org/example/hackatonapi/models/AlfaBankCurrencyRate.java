@@ -9,5 +9,4 @@ import java.util.List;
 public class AlfaBankCurrencyRate {
     @JsonProperty("rates")
     private List<AlfaCurrency> rates;
-
 }

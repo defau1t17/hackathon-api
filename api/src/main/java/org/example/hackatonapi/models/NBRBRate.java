@@ -9,7 +9,7 @@ import java.util.Date;
 @Data
 public class NBRBRate {
     @JsonProperty("Cur_ID")
-    private int Cur_ID;
+    private Integer Cur_ID;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date Date;
     @JsonProperty("Cur_Abbreviation")

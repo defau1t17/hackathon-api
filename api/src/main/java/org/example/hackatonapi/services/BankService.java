@@ -76,12 +76,7 @@ public class BankService {
             return Collections.emptyList();
         }
 
-        return switch (bankName.toUpperCase()) {
-            case BankConsts.ALFA -> alfabankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
-            case BankConsts.BELBANK -> balarusBankService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
-            case BankConsts.NBRB -> nbrbCurrencyService.getCurrencyRatesInDateRange(currencyCode, startDate, endDate);
-            default -> Collections.emptyList();
-        };
+        return getCurrencyRatesInDateRange(bankName, currencyCode, startDate, endDate);
     }
 
     public XYDataset createDataset(List<CurrencyDTO> historicalData) {

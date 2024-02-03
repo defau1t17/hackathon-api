@@ -6,19 +6,19 @@ import lombok.Data;
 @Data
 public class AlfaCurrency {
     @JsonProperty("sellRate")
-    private double sellRate;
+    private Double sellRate;
     @JsonProperty("sellIso")
     private String sellIso;
     @JsonProperty("sellCode")
-    private int sellCode;
+    private Integer sellCode;
     @JsonProperty("buyRate")
-    private double buyRate;
+    private Double buyRate;
     @JsonProperty("buyIso")
     private String buyIso;
     @JsonProperty("buyCode")
-    private int buyCode;
+    private Integer buyCode;
     @JsonProperty("quantity")
-    private int quantity;
+    private Integer quantity;
     @JsonProperty("date")
     private String date;
 }
