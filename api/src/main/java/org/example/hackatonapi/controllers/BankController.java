@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +69,38 @@ public class BankController {
         }
 
         return ResponseEntity.ok(currencies);
+    }
+
+    @GetMapping("/rate")
+    public ResponseEntity<CurrencyDTO> getCurrencyRateForDate(
+            @RequestParam String currencyCode,
+            @RequestParam String bankName,
+            @RequestParam String date) {
+
+        if (!BankConsts.ALL_BANKS.contains(bankName.toUpperCase())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        CurrencyDTO currencyDTO;
+        switch (bankName.toUpperCase()) {
+            case BankConsts.ALFA:
+                currencyDTO = alfabankService.getCurrencyRateForDate(currencyCode, date);
+                break;
+            case BankConsts.BELBANK:
+                currencyDTO = balarusBankService.getCurrencyRateForDate(currencyCode, date);
+                break;
+            case BankConsts.NBRB:
+                currencyDTO = nbrbCurrencyService.getCurrencyRateForDate(currencyCode, date);
+                break;
+            default:
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        if (currencyDTO == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(currencyDTO);
     }
 
 //    @GetMapping("/statistics")

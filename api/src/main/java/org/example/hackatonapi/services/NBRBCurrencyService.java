@@ -7,10 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.stream.Stream;
 
 @Service
-public class NBRBCurrencyService {
+public class NBRBCurrencyService implements BankService {
 
     private final String CURRENCIES_API_URL = "https://api.nbrb.by/exrates/currencies";
     private final String RATES_API_URL = "https://api.nbrb.by/exrates/rates?periodicity=0";
@@ -43,5 +44,20 @@ public class NBRBCurrencyService {
         LocalDate date = rate.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 
         return new CurrencyDTO(name, price, price, date);
+    }
+
+
+    @Override
+    public CurrencyDTO getCurrencyRateForDate(String currencyCode, String date) {
+        NBRBRate[] rates = getRates();
+
+        for (NBRBRate rate : rates) {
+            LocalDate currencyDate = rate.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+            if (currencyCode.equalsIgnoreCase(rate.getCur_Abbreviation()) && currencyDate.isEqual(LocalDate.parse(date))) {
+                return convertRateToCurrencyDTO(rate);
+            }
+        }
+        return null;
     }
 }

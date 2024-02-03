@@ -5,6 +5,7 @@ import org.example.hackatonapi.models.dto.CurrencyDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BalarusBankService {
+public class BalarusBankService implements BankService {
     private static final String API_URL = "https://belarusbank.by/api/kurs_cards";
 
     RestTemplate restTemplate = new RestTemplate();
@@ -45,5 +46,22 @@ public class BalarusBankService {
         currencyDTO.setOffSellRate(currencyRate.getUsdCardOut());
 
         return currencyDTO;
+    }
+
+    @Override
+    public CurrencyDTO getCurrencyRateForDate(String currencyCode, String date) {
+        BelarusbankCurrencyRate[] currencyRates = getCurrencyRates();
+
+        for (BelarusbankCurrencyRate currencyRate : currencyRates) {
+            LocalDate currencyDate = LocalDateTime.parse(
+                            currencyRate.getKursDateTime(),
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    .toLocalDate();
+
+            if ("USD".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
+                return convertToCurrencyDTO(currencyRate);
+            }
+        }
+        return null;
     }
 }
