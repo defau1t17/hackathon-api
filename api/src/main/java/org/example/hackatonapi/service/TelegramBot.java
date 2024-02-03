@@ -171,7 +171,6 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
 
 
-
                 case "Статистика" -> {
                     System.out.println(inputUserDate);
                     byte[] png = apiService.getStatisticsAsPNG(map.get(chatId).getCurrencyName(), map.get(chatId).getBankName(), "2024-01-31", LocalDate.now().toString());
@@ -206,7 +205,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(promptMessage);
 
                     String inputDate = update.getMessage().getText().trim();
-                    inputUserDate=inputDate;
+                    inputUserDate = inputDate;
                     System.out.println(inputDate);
 
                     try {
@@ -226,7 +225,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     } catch (DateTimeParseException e) {
                         SendMessage errorMessage = new SendMessage();
                         errorMessage.setChatId(chatId);
-                        errorMessage.setText("");
+                        errorMessage.setText("Вы ввели некорректную команду");
                         sendMessage(errorMessage);
                     }
                 }
