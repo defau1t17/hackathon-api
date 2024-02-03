@@ -102,12 +102,14 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
 
                 case "Выбрать другой банк" -> {
+
                     SendMessage message = ActionMenu.getMenu();
                     message.setChatId(chatId);
                     message.setText(messageText);
                     sendMessage(message);
                 }
                 case "Выбрать другую валюту" -> {
+                    
                     SendMessage message = CurrencyMenu.getMenu();
                     message.setChatId(chatId);
                     message.setText(messageText);

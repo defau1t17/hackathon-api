@@ -30,6 +30,7 @@ public class ActionMenu {
 //        row.add("Выбрать другую валюту");
 //        keyboardRows.add(row);
 
+
         keyboardMarkup.setKeyboard(keyboardRows);
 
         message.setReplyMarkup(keyboardMarkup);
