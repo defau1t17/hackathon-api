@@ -101,8 +101,21 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(setCurrencyState(messageText, chatId));
                 }
 
+                case "Выбрать другой банк" -> {
+                    SendMessage message = ActionMenu.getMenu();
+                    message.setChatId(chatId);
+                    message.setText(messageText);
+                    sendMessage(message);
+                }
+                case "Выбрать другую валюту" -> {
+                    SendMessage message = CurrencyMenu.getMenu();
+                    message.setChatId(chatId);
+                    message.setText(messageText);
+                    sendMessage(message);
+                }
+
                 case "Курс на выбранный день" -> {
-                    
+
                 }
                 case "Курс на текущий день" -> {
                 }

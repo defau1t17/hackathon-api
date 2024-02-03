@@ -25,6 +25,11 @@ public class ActionMenu {
         row.add("НБРБ");
         keyboardRows.add(row);
 
+//        row = new KeyboardRow();
+//        row.add("Выбрать другой банк");
+//        row.add("Выбрать другую валюту");
+//        keyboardRows.add(row);
+
         keyboardMarkup.setKeyboard(keyboardRows);
 
         message.setReplyMarkup(keyboardMarkup);
