@@ -1,4 +1,4 @@
-package org.example.hackatonapi.models.dto;
+package org.example.hackatonapi.api.models.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CurrencyDTO {
     private String shortName;
-    private double offBuyRate;
-    private double offSellRate;
+    private Double offBuyRate;
+    private Double offSellRate;
     private LocalDate date;
 }

@@ -1,4 +1,4 @@
-package org.example.hackatonapi.config;
+package org.example.hackatonapi.tg_bot.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;

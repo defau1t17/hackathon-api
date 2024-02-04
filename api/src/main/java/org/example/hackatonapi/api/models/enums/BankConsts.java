@@ -1,4 +1,4 @@
-package org.example.hackatonapi.models.enums;
+package org.example.hackatonapi.api.models.enums;
 
 import java.util.Set;
 import java.util.stream.Collectors;

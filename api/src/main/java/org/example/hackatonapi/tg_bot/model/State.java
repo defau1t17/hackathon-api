@@ -1,4 +1,4 @@
-package org.example.hackatonapi.model;
+package org.example.hackatonapi.tg_bot.model;
 
 import lombok.Data;
 

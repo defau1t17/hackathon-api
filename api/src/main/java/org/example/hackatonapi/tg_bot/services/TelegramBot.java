@@ -1,13 +1,12 @@
-package org.example.hackatonapi.service;
+package org.example.hackatonapi.tg_bot.services;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.hackatonapi.config.BotConfig;
-import org.example.hackatonapi.menu.ActionMenu;
-import org.example.hackatonapi.menu.CurrencyMenu;
-import org.example.hackatonapi.menu.DateMenu;
-import org.example.hackatonapi.model.State;
-import org.example.hackatonapi.models.dto.CurrencyDTO;
-import org.example.hackatonapi.services.ApiService;
+import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.tg_bot.config.BotConfig;
+import org.example.hackatonapi.tg_bot.menu.ActionMenu;
+import org.example.hackatonapi.tg_bot.menu.CurrencyMenu;
+import org.example.hackatonapi.tg_bot.menu.DateMenu;
+import org.example.hackatonapi.tg_bot.model.State;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -102,6 +101,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                     message.setText(messageText);
                     sendMessage(message);
                 }
+
                 case "Выбрать другую валюту" -> {
                     SendMessage message = CurrencyMenu.getMenu();
                     message.setChatId(chatId);
@@ -118,6 +118,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                             "\nКурс продажи: " + currencyRateForDate.getOffSellRate());
                     sendMessage(message);
                 }
+
                 case "Курс на выбранный день" -> {
                     SendMessage promptMessage = new SendMessage();
                     promptMessage.setChatId(chatId);
@@ -172,6 +173,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         System.err.println("Error sending photo: " + e.getMessage());
                     }
                 }
+
                 default -> {
                     SendMessage promptMessage = new SendMessage();
                     promptMessage.setChatId(chatId);

@@ -1,11 +1,11 @@
-package org.example.hackatonapi.controllers;
+package org.example.hackatonapi.api.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.example.hackatonapi.models.dto.CurrencyDTO;
-import org.example.hackatonapi.models.enums.BankConsts;
-import org.example.hackatonapi.services.BankService;
+import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.models.enums.BankConsts;
+import org.example.hackatonapi.api.services.BankService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -1,9 +1,8 @@
-package org.example.hackatonapi.services;
+package org.example.hackatonapi.api.services;
 
-
-import org.example.hackatonapi.models.AlfaCurrency;
-import org.example.hackatonapi.models.AlfaBankCurrencyRate;
-import org.example.hackatonapi.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.models.AlfaBankCurrencyRate;
+import org.example.hackatonapi.api.models.AlfaCurrency;
+import org.example.hackatonapi.api.models.dto.CurrencyDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

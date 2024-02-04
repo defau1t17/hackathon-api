@@ -1,4 +1,4 @@
-package org.example.hackatonapi.models;
+package org.example.hackatonapi.api.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

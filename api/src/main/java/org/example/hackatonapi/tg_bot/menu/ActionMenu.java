@@ -1,4 +1,4 @@
-package org.example.hackatonapi.menu;
+package org.example.hackatonapi.tg_bot.menu;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;

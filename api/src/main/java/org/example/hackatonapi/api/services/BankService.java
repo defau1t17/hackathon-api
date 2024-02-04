@@ -1,8 +1,7 @@
-package org.example.hackatonapi.services;
+package org.example.hackatonapi.api.services;
 
-import org.example.hackatonapi.models.dto.CurrencyDTO;
-import org.example.hackatonapi.models.enums.BankConsts;
-
+import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.models.enums.BankConsts;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
