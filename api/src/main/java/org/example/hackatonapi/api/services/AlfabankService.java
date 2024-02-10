@@ -3,6 +3,7 @@ package org.example.hackatonapi.api.services;
 import org.example.hackatonapi.api.models.AlfaBankCurrencyRate;
 import org.example.hackatonapi.api.models.AlfaCurrency;
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.services.interfaces.BankServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public class AlfabankService implements BankServiceInterface {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String ALFABANK_REQUEST_URL = "https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates";
+    private static final String ALFABANK_REQUEST_URL = "https://developerhub.alfabank.by:8273/partner/1.0.1/public/rates";
 
     public AlfaBankCurrencyRate getCurrencies() {
         AlfaBankCurrencyRate body = restTemplate.getForEntity(ALFABANK_REQUEST_URL, AlfaBankCurrencyRate.class).getBody();

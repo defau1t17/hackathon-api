@@ -2,26 +2,30 @@ package org.example.hackatonapi.api.services;
 
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
 import org.example.hackatonapi.api.models.enums.BankConsts;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.time.ZoneId;
+import java.util.*;
 
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
 
 @Service
 public class BankService {
@@ -79,13 +83,15 @@ public class BankService {
     }
 
     public XYDataset createDataset(List<CurrencyDTO> historicalData) {
-        XYSeries series = new XYSeries("Exchange Rate");
+        TimeSeries series = new TimeSeries("Exchange Rate");
 
         for (CurrencyDTO dataPoint : historicalData) {
-            series.add(dataPoint.getDate().toEpochDay(), dataPoint.getOffBuyRate());
+            Date date = Date.from(dataPoint.getDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Day day = new Day(date);
+            series.addOrUpdate(day, dataPoint.getOffBuyRate());
         }
 
-        return new XYSeriesCollection(series);
+        return new TimeSeriesCollection(series);
     }
 
     public JFreeChart createChart(XYDataset dataset) {
@@ -99,14 +105,28 @@ public class BankService {
                 false
         );
 
+        chart.setBackgroundPaint(Color.white);
+
         XYPlot plot = chart.getXYPlot();
+        plot.setBackgroundPaint(new Color(240, 240, 240));
+        plot.setDomainGridlinePaint(Color.lightGray);
+        plot.setRangeGridlinePaint(Color.lightGray);
+
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
         renderer.setSeriesShapesVisible(0, true);
         renderer.setSeriesShapesFilled(0, true);
         plot.setRenderer(renderer);
 
+        DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("yyyy-MM-dd"));
+
+        ValueAxis rangeAxis = plot.getRangeAxis();
+        rangeAxis.setLowerMargin(0.15);
+        rangeAxis.setUpperMargin(0.15);
+
         return chart;
     }
+
 
     public byte[] chartToBytes(JFreeChart chart) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {

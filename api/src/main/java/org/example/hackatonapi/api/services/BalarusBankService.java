@@ -2,6 +2,7 @@ package org.example.hackatonapi.api.services;
 
 import org.example.hackatonapi.api.models.BelarusBankCurrencyRate;
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.services.interfaces.BankServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,13 +29,11 @@ public class BalarusBankService implements BankServiceInterface {
 
     public static List<CurrencyDTO> convertToCurrencyDTOList(BelarusBankCurrencyRate[] currencyRates) {
         List<CurrencyDTO> convertedRates = new ArrayList<>();
-
         for (BelarusBankCurrencyRate currencyRate : currencyRates) {
             LocalDate date = LocalDate.parse(
                     currencyRate.getKursDateTime(),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             );
-
 
             if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0) {
                 convertedRates.add(new CurrencyDTO("USD", currencyRate.getUsdCardIn(), currencyRate.getUsdCardOut(), date));
@@ -52,26 +51,32 @@ public class BalarusBankService implements BankServiceInterface {
         return convertedRates;
     }
 
-    private CurrencyDTO convertToCurrencyDTO(BelarusBankCurrencyRate currencyRate) {
+    private CurrencyDTO convertToCurrencyDTO(BelarusBankCurrencyRate currencyRate, String currencyCode) {
         LocalDate date = LocalDate.parse(
                 currencyRate.getKursDateTime(),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         );
 
-        if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0) {
-            return new CurrencyDTO("USD", currencyRate.getUsdCardIn(), currencyRate.getUsdCardOut(), date);
-        }
+        double cardIn = 0;
+        double cardOut = switch (currencyCode) {
+            case "USD" -> {
+                cardIn = currencyRate.getUsdCardIn();
+                yield currencyRate.getUsdCardOut();
+            }
+            case "EUR" -> {
+                cardIn = currencyRate.getEurCardIn();
+                yield currencyRate.getEurCardOut();
+            }
+            case "RUB" -> {
+                cardIn = currencyRate.getRubCardIn();
+                yield currencyRate.getRubCardOut();
+            }
+            default -> 0;
+        };
 
-        if (currencyRate.getEurCardIn() > 0 || currencyRate.getEurCardOut() > 0) {
-            return new CurrencyDTO("EUR", currencyRate.getEurCardIn(), currencyRate.getEurCardOut(), date);
-        }
-
-        if (currencyRate.getRubCardIn() > 0 || currencyRate.getRubCardOut() > 0) {
-            return new CurrencyDTO("RUB", currencyRate.getRubCardIn(), currencyRate.getRubCardOut(), date);
-        }
-
-        return null;
+        return (cardIn > 0 || cardOut > 0) ? new CurrencyDTO(currencyCode, cardIn, cardOut, date) : null;
     }
+
 
     @Override
     public CurrencyDTO getCurrencyRateForDate(String currencyCode, String date) {
@@ -84,13 +89,13 @@ public class BalarusBankService implements BankServiceInterface {
                     .toLocalDate();
 
             if ("USD".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
-                return convertToCurrencyDTO(currencyRate);
+                return convertToCurrencyDTO(currencyRate, currencyCode);
             }
             if ("EUR".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
-                return convertToCurrencyDTO(currencyRate);
+                return convertToCurrencyDTO(currencyRate, currencyCode);
             }
             if ("RUB".equalsIgnoreCase(currencyCode) && currencyDate.isEqual(LocalDate.parse(date))) {
-                return convertToCurrencyDTO(currencyRate);
+                return convertToCurrencyDTO(currencyRate, currencyCode);
             }
         }
         return null;
@@ -103,21 +108,14 @@ public class BalarusBankService implements BankServiceInterface {
         List<CurrencyDTO> currencyDTOs = new ArrayList<>();
 
         for (BelarusBankCurrencyRate currencyRate : currencyRates) {
-            LocalDate currencyDate = LocalDateTime.parse(
-                    currencyRate.getKursDateTime(),
-                    formatter
-            ).toLocalDate();
+            LocalDate currencyDate = LocalDateTime.parse(currencyRate.getKursDateTime(), formatter).toLocalDate();
 
-            if (currencyRate.getUsdCardIn() > 0 || currencyRate.getUsdCardOut() > 0 ||
-                    currencyRate.getEurCardIn() > 0 || currencyRate.getEurCardOut() > 0 ||
-                    currencyRate.getRubCardIn() > 0 || currencyRate.getRubCardOut() > 0) {
-                if (!currencyDate.isBefore(LocalDate.parse(startDate)) && !currencyDate.isAfter(LocalDate.parse(endDate))) {
-                    currencyDTOs.add(convertToCurrencyDTO(currencyRate));
-                }
+            if (!currencyDate.isBefore(LocalDate.parse(startDate))
+                    && !currencyDate.isAfter(LocalDate.parse(endDate))) {
+                currencyDTOs.add(convertToCurrencyDTO(currencyRate, currencyCode));
             }
         }
 
         return currencyDTOs;
     }
-
 }

@@ -2,6 +2,7 @@ package org.example.hackatonapi.api.services;
 
 import org.example.hackatonapi.api.models.NBRBRate;
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.services.interfaces.BankServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,8 +14,8 @@ import java.util.List;
 @Service
 public class NBRBCurrencyService implements BankServiceInterface {
 
-    private final String RATES_API_URL = "https://api.nbrb.by/exrates/rates?periodicity=0";
-    private final String RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT = "https://api.nbrb.by/exrates/rates/%s?parammode=2&ondate=%s";
+    private final static String RATES_API_URL = "https://api.nbrb.by/exrates/rates?periodicity=0";
+    private final static String RATE_FOR_CURRENCY_ON_DATE_API_URL_FORMAT = "https://api.nbrb.by/exrates/rates/%s?parammode=2&ondate=%s";
 
     RestTemplate restTemplate = new RestTemplate();
 

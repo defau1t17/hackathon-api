@@ -3,6 +3,7 @@ package org.example.hackatonapi.api.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
 import org.example.hackatonapi.api.models.enums.BankConsts;
 import org.example.hackatonapi.api.services.BankService;
@@ -20,6 +21,7 @@ import org.jfree.data.xy.XYDataset;
 
 @RestController
 @RequestMapping("/api/banks")
+@Tag(name = "Bank Controller", description = "Operations related to banks and currencies")
 public class BankController {
     public BankController(BankService bankService) {
         this.bankService = bankService;
@@ -28,6 +30,11 @@ public class BankController {
     private final BankService bankService;
 
     @GetMapping
+    @Operation(summary = "Get all available banks", description = "Returns a set of all available banks")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - Returns a set of available banks"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
+    })
     public ResponseEntity<Set<String>> getAllBanks() {
         Set<String> banks = bankService.getAllBanks();
         return ResponseEntity.status(HttpStatus.OK).body(banks);
@@ -55,6 +62,13 @@ public class BankController {
     }
 
     @GetMapping("/rate")
+    @Operation(summary = "Get currency rate for a specific date", description = "Returns the currency rate for a specific date")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - Returns the currency rate for the specified date"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - If the bank name is not valid or the date format is incorrect"),
+            @ApiResponse(responseCode = "404", description = "Not Found - If the bank or currency is not found for the specified date"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
+    })
     public ResponseEntity<CurrencyDTO> getCurrencyRateForDate(
             @RequestParam String currencyCode,
             @RequestParam String bankName,
@@ -73,6 +87,13 @@ public class BankController {
     }
 
     @GetMapping("/rates")
+    @Operation(summary = "Get currency rates in a date range", description = "Returns currency rates within a specified date range")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - Returns currency rates within the specified date range"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - If the bank name is not valid, or the date range is incorrect"),
+            @ApiResponse(responseCode = "404", description = "Not Found - If the bank or currency is not found for the specified date range"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
+    })
     public ResponseEntity<List<CurrencyDTO>> getCurrencyRatesInDateRange(
             @RequestParam String currencyCode,
             @RequestParam String bankName,
@@ -98,6 +119,12 @@ public class BankController {
     }
 
     @GetMapping(value = "/statistics/png", produces = MediaType.IMAGE_PNG_VALUE)
+    @Operation(summary = "Get statistical chart as PNG", description = "Returns a statistical chart as PNG image")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK - Returns a statistical chart as PNG image"),
+            @ApiResponse(responseCode = "404", description = "Not Found - If historical data is not available for the specified parameters"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error - In case of server errors")
+    })
     public ResponseEntity<byte[]> getStatistics(
             @RequestParam String currencyCode,
             @RequestParam String bankName,

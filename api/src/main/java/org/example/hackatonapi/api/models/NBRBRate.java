@@ -10,12 +10,16 @@ import java.util.Date;
 public class NBRBRate {
     @JsonProperty("Cur_ID")
     private Integer Cur_ID;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date Date;
+
     @JsonProperty("Cur_Abbreviation")
     private String Cur_Abbreviation;
+
     @JsonProperty("Cur_Scale")
     private int Cur_Scale;
+
     @JsonProperty("Cur_OfficialRate")
     private double Cur_OfficialRate;
 }
