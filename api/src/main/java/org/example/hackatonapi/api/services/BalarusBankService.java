@@ -2,6 +2,7 @@ package org.example.hackatonapi.api.services;
 
 import org.example.hackatonapi.api.models.BelarusBankCurrencyRate;
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
+import org.example.hackatonapi.api.services.interfaces.BankServiceInterface;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 

@@ -1,4 +1,4 @@
-package org.example.hackatonapi.api.services;
+package org.example.hackatonapi.api.services.interfaces;
 
 
 import org.example.hackatonapi.api.models.dto.CurrencyDTO;
